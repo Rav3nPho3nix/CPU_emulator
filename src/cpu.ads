@@ -1,6 +1,7 @@
 with Interfaces; use Interfaces;
+with System;
 
-package Core is
+package Cpu is
    
    --  Instructions
    type Instructions is (
@@ -44,7 +45,12 @@ package Core is
    type Memory_Index is range 0 .. 2**16 - 1;
 
    --  Memory array
-   type Memory_Array is array (Memory_Index) of Unsigned_16;
+   type Memory_Array is array (Memory_Index) of Unsigned_16
+      with Convention => C;
+
+   --  Memory pointer from C code
+   type Memory_Access is access all Memory_Array
+      with Convention => C;
 
    --  Registers of the CPU
    type Registers_Record is record
@@ -52,4 +58,13 @@ package Core is
       PSR, USP, SSP, IR : Unsigned_16 := 0;
       PC : Memory_Index := 0;
    end record;
-end Core;
+
+   --  Load instructions in memory from C array
+   procedure Load_Memory (Memory : Memory_Access)
+     with Export => True, Convention => C, External_Name => "load_memory";
+
+   --  Execute instructions stored in memory
+   procedure Execute
+      with Export => True, Convention => C, External_Name => "execute";
+
+end Cpu;
