@@ -1,6 +1,6 @@
 with Interfaces; use Interfaces;
 
-with Core; use Core;
+with Cpu; use Cpu;
 
 package Print_Utility is
    --  Base representation for printing
@@ -13,5 +13,4 @@ package Print_Utility is
 
    --  Print the registers value based on given Base_Representation
    procedure Print_Registers (Registers : Registers_Record; Base : Base_Representation := HEXADECIMAL);
-   
 end Print_Utility;

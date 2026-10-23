@@ -1,7 +1,7 @@
 with Ada.Integer_Text_IO;
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Core; use Core;
+with Cpu; use Cpu;
 
 package body Print_Utility is
 
@@ -36,10 +36,9 @@ package body Print_Utility is
          if (n mod 16) < 10 then
             str (j) := Character'Val (Character'Pos ('0') + Integer (n mod 10));
          else
-            str (j) := Character'Val (Character'Pos ('A') + Integer (n mod 6));
+            str (j) := Character'Val (Character'Pos ('A') + Integer (n mod 16) - 10);
 
          end if;
-         
          n := n / 16;
 
          exit when n = 0;
@@ -97,7 +96,7 @@ package body Print_Utility is
    end Print_Binary;
 
    --  Print an hexadecimal number with correct width
-   procedure Print_Hexadecimal (i: Unsigned_16) is
+   procedure Print_Hexadecimal (i : Unsigned_16) is
    begin
       Put ("0x ");
       Put (Hexadecimal_Representation (i));
