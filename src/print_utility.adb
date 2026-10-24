@@ -152,30 +152,38 @@ package body Print_Utility is
 
       --  R0 & R1
       Put ("| R0  : ");
-      f.all (Registers.R0);
+      --  f.all (Registers.R0);
+      f.all (Unsigned_16 (Registers.Registers(0)));
       Put (" | R1  : ");
-      f.all (Registers.R1);
+      --  f.all (Registers.R1);
+      f.all (Unsigned_16 (Registers.Registers(1)));
       Put_Line (" |");
       
       --  R2 & R3
       Put ("| R2  : ");
-      f.all (Registers.R2);
+      --  f.all (Registers.R2);
+      f.all (Unsigned_16 (Registers.Registers(2)));
       Put (" | R3  : ");
-      f.all (Registers.R3);
+      --  f.all (Registers.R3);
+      f.all (Unsigned_16 (Registers.Registers(3)));
       Put_Line (" |");
 
       --  R4 & R5
       Put ("| R4  : ");
-      f.all (Registers.R4);
+      --  f.all (Registers.R4);
+      f.all (Unsigned_16 (Registers.Registers(4)));
       Put (" | R5  : ");
-      f.all (Registers.R5);
+      --  f.all (Registers.R5);
+      f.all (Unsigned_16 (Registers.Registers(5)));
       Put_Line (" |");
 
       --  R6 & R7
       Put ("| R6  : ");
-      f.all (Registers.R6);
+      --  f.all (Registers.R6);
+      f.all (Unsigned_16 (Registers.Registers(6)));
       Put (" | R7  : ");
-      f.all (Registers.R7);
+      --  f.all (Registers.R7);
+      f.all (Unsigned_16 (Registers.Registers(7)));
       Put_Line (" |");
       
       --  PSR & USP
