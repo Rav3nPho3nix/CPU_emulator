@@ -1,5 +1,6 @@
 with Ada.Integer_Text_IO;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Characters.Latin_1; use Ada.Characters.Latin_1;
 
 with Cpu; use Cpu;
 
@@ -117,7 +118,7 @@ package body Print_Utility is
 
    --  Print the registers value based on given Base_Representation
    procedure Print_Registers (Registers : Registers_Record; Base : Base_Representation := HEXADECIMAL) is
-      LABEL_OFFSET : Unsigned_16 := 8;
+      LABEL_OFFSET : constant Unsigned_16 := 8;
 
       f : Print_Function;
       prefix_offset : Unsigned_16;
@@ -204,6 +205,71 @@ package body Print_Utility is
       Put_Line ("");
       
    end Print_Registers;
+
+   --  Print an error with the given input message in red
+   procedure Print_Error (Message : String) is
+   begin
+      Put_Line (ESC & "[91m" & Message & ESC & "[0m");
+   end Print_Error;
+
+   --  Print an instruction
+   procedure Print_Instruction (Instruction : Unsigned_16) is
+      Operation : Operation_Code := Operation_Code (Shift_Right (Instruction, 12));
+      Remaining : Instruction_Remaining := Instruction_Remaining (Instruction and 16#0FFF#);
+   begin
+      case Operation is
+         --  BR
+         when Instructions'Enum_Rep (BR_INSTRUCTION) =>
+            Put ("BR ");
+         --  ADD
+         when Instructions'Enum_Rep (ADD_INSTRUCTION) =>
+            Put ("ADD ");
+         --  LD
+         when Instructions'Enum_Rep (LD_INSTRUCTION) =>
+            Put ("LD ");
+         --  ST
+         when Instructions'Enum_Rep (ST_INSTRUCTION) =>
+            Put ("ST ");
+         --  JSR
+         when Instructions'Enum_Rep (JSR_INSTRUCTION) =>
+            Put ("JSR ");
+         --  AND
+         when Instructions'Enum_Rep (AND_INSTRUCTION) =>
+            Put ("AND ");
+         --  LDR
+         when Instructions'Enum_Rep (LDR_INSTRUCTION) =>
+            Put ("LDR ");
+         --  STR
+         when Instructions'Enum_Rep (STR_INSTRUCTION) =>
+            Put ("STR ");
+         --  RTI
+         when Instructions'Enum_Rep (RTI_INSTRUCTION) =>
+            Put ("RTI ");
+         --  NOT
+         when Instructions'Enum_Rep (NOT_INSTRUCTION) =>
+            Put ("NOT ");
+         --  LDI
+         when Instructions'Enum_Rep (LDI_INSTRUCTION) =>
+            Put ("LDI ");
+         --  STI
+         when Instructions'Enum_Rep (STI_INSTRUCTION) =>
+            Put ("STI ");
+         --  JMP
+         when Instructions'Enum_Rep (JMP_INSTRUCTION) =>
+            Put ("JMP ");
+         --  LEA
+         when Instructions'Enum_Rep (LEA_INSTRUCTION) =>
+            Put ("LEA ");
+         --  TRAP
+         when Instructions'Enum_Rep (TRAP_INSTRUCTION) =>
+            Put ("TRAP");
+         --  Default
+         when others =>
+            null;
+      end case;
+
+      Put_Line ("");
+   end Print_Instruction;
 
 begin
    null;
