@@ -223,7 +223,7 @@ package body Print_Utility is
    --  Print an instruction
    procedure Print_Instruction (Instruction : Unsigned_16) is
       Operation : Operation_Code := Operation_Code (Shift_Right (Instruction, 12));
-      Remaining : Instruction_Remaining := Instruction_Remaining (Instruction and 16#0FFF#);
+      Operands : Operands_Bits := Operands_Bits (Instruction and 16#0FFF#);
    begin
       case Operation is
          --  BR
