@@ -41,6 +41,14 @@ package Cpu is
       TRAP_INSTRUCTION => 2#1111#
    );
 
+   --  Operation code type
+   type Operation_Code is mod 2 ** 4;
+   for Operation_Code'Size use 4;
+
+   --  Instruction remaining
+   type Instruction_Remaining is mod 2 ** 12;
+   for Instruction_Remaining'Size use 12;
+
    --  Memory index
    type Memory_Index is range 0 .. 2**16 - 1;
 
@@ -59,12 +67,15 @@ package Cpu is
       PC : Memory_Index := 0;
    end record;
 
-   --  Load instructions in memory from C array
-   procedure Load_Memory (Memory : Memory_Access)
-     with Export => True, Convention => C, External_Name => "load_memory";
+   --  Load memory from C array
+   procedure Load_Memory (Memory_Source : Memory_Access)
+      with Export => True, Convention => C, External_Name => "load_memory";
 
    --  Execute instructions stored in memory
-   procedure Execute
-      with Export => True, Convention => C, External_Name => "execute";
+   procedure Start
+      with Export => True, Convention => C, External_Name => "start";
+
+   -- Halt the CPU
+   procedure Halt;
 
 end Cpu;

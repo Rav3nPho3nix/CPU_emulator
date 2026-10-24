@@ -1,6 +1,5 @@
 with Interfaces; use Interfaces;
 with System;
---  with Ada.Text_IO; use Ada.Text_IO;
 
 with Cpu; use Cpu;
 with Print_Utility; use Print_Utility;
@@ -12,31 +11,67 @@ package body Cpu is
    --  Registers of the CPU
    Registers : Registers_Record;
 
-   --  Load instructions in memory from C array
-   procedure Load_Memory (Memory : Memory_Access) is
+   --  Boolean value to check if the memory have been loaded
+   Memory_Is_Loaded : Boolean := False;
+
+   --  Boolean value to check if the cpu has halted
+   Has_Halted : Boolean := False;
+
+   --  Decode and execute an instruction
+   --  Always increment PC by one
+   procedure Execute (Instruction : Unsigned_16) is
+      --  Get the operation code
+      --  Execute a right shift to get the first four bits
+      Operation : Operation_Code := Operation_Code (Shift_Right (Instruction, 12));
+
+      --  Get the remaining instruction content
+      --  Use a mask to only get the 12 first bits
+      Remaining : Instruction_Remaining := Instruction_Remaining (Instruction and 16#0FFF#);
    begin
-      null;
+      -- Increment PC by one
+      Registers.PC := Registers.PC + 1;
+
+      --  Halt if the operation is illegal
+      if Operation = 2#1101# then
+         Print_Error ("Unused operation detected.\nHalting.");
+         Halt;
+      end if;
+
+      Print_Instruction (Instruction);
+   end Execute;
+
+   --  Load the memory from C array
+   procedure Load_Memory (Memory_Source : Memory_Access) is
+   begin
+      Memory := Memory_Source.all;
+      --  Set the flag as true
+      Memory_Is_Loaded := True;
    end Load_Memory;
 
    --  Execute instructions stored in memory
-   procedure Execute is
+   procedure Start is
    begin
-      null;
-   end Execute;
+      --  Check if the memory is loaded
+      --  If not, put an error and exit the function
+      if not Memory_Is_Loaded then
+         Print_Error ("The memory need to be loaded before starting the CPU.");
+         return;
+      end if;
+
+      while (not Has_Halted) and (Registers.PC < 2**16) loop
+         Execute (Memory (Registers.PC));
+      end loop;
+
+      --  Print_Registers (Registers, DECIMAL);
+      --  Print_Registers (Registers, HEXADECIMAL);
+   end Start;
+
+   -- Halt the CPU
+   procedure Halt is
+   begin
+      Has_Halted := True;
+   end Halt;
 
 begin
-   Registers.R0 := 13;
-   Registers.R1 := 16#FFFF#;
-   Registers.R2 := 16#FFFE#;
-   Registers.R3 := 16#2#;
-   Registers.PC := 2#1#;
-
-   --  Remplir la memoire
-   Memory (0) := 2#0101_0101_0101_0101#;
-   Memory (1) := 2#1111_0000_0000_0001#;
-   Memory (2) := 2#1010_1010_1010_1010#;
-
-   --  Print_Registers (Registers, DECIMAL);
-   --  Print_Registers (Registers, HEXADECIMAL);
-
+   null;
 end Cpu;
