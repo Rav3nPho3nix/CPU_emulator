@@ -1,4 +1,5 @@
 with Interfaces; use Interfaces;
+with Interfaces.C.Extensions;
 with System;
 
 package Cpu is
@@ -45,9 +46,9 @@ package Cpu is
    type Operation_Code is mod 2 ** 4;
    for Operation_Code'Size use 4;
 
-   --  Instruction remaining
-   type Instruction_Remaining is mod 2 ** 12;
-   for Instruction_Remaining'Size use 12;
+   --  Operands
+   type Operands_Bits is mod 2 ** 12;
+   for Operands_Bits'Size use 12;
 
    --  Memory index
    type Memory_Index is range 0 .. 2**16 - 1;
@@ -60,9 +61,22 @@ package Cpu is
    type Memory_Access is access all Memory_Array
       with Convention => C;
 
+   --  Register type
+   type Register is mod 2 ** 4;
+
+   --  Register index
+   --  There is 8 registers
+   type Register_Index is range 0 .. 7;
+
+   --  Register array
+   type Register_Array is array (Register_Index) of Register;
+
+   --  Registers array
+
    --  Registers of the CPU
    type Registers_Record is record
-      R0, R1, R2, R3, R4, R5, R6, R7 : Unsigned_16 := 0;
+      --  R0, R1, R2, R3, R4, R5, R6, R7 : Unsigned_16 := 0;
+      Registers : Register_Array := (others => 0);
       PSR, USP, SSP, IR : Unsigned_16 := 0;
       PC : Memory_Index := 0;
    end record;
