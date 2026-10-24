@@ -1,6 +1,4 @@
 with Interfaces; use Interfaces;
-with Interfaces.C.Extensions;
-with System;
 
 package Cpu is
    

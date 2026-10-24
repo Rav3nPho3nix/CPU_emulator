@@ -1,10 +1,15 @@
 with Interfaces; use Interfaces;
-with System;
 
 with Cpu; use Cpu;
 with Print_Utility; use Print_Utility;
 
 package body Cpu is
+   --  Pointer to an instruction execution function
+   type Instruction_Function is access function (Operands : Operands_Bits) return Boolean;
+
+   --  Instruction execution function array
+   type Instruction_Function_Array is array (Operation_Code) of Instruction_Function;
+
    --  Memory (need to be loaded before calling 'Execute')
    Memory : Memory_Array := (others => 0);
 
@@ -15,14 +20,14 @@ package body Cpu is
    Memory_Is_Loaded : Boolean := False;
 
    --  Boolean value to check if the cpu has halted
-   Has_Halted : Boolean := False;
+   Is_Halted : Boolean := False;
 
    --  Execute a BR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_BR(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_BR;
 
    --  Execute an ADD instruction
@@ -32,7 +37,7 @@ package body Cpu is
    begin
       --  --  What register the ADD value must me stored
       --  dr : Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 8));
-      null;
+      return True;
    end Execute_ADD;
 
    --  Execute an LD instruction
@@ -40,7 +45,7 @@ package body Cpu is
    --  Else True
    function Execute_LD(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_LD;
 
    --  Execute an ST instruction
@@ -48,7 +53,7 @@ package body Cpu is
    --  Else True
    function Execute_ST(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_ST;
 
    --  Execute an JSR instruction
@@ -56,7 +61,7 @@ package body Cpu is
    --  Else True
    function Execute_JSR(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_JSR;
 
    --  Execute an AND instruction
@@ -64,7 +69,7 @@ package body Cpu is
    --  Else True
    function Execute_AND(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_AND;
 
    --  Execute an LDR instruction
@@ -72,7 +77,7 @@ package body Cpu is
    --  Else True
    function Execute_LDR(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_LDR;
 
    --  Execute an STR instruction
@@ -80,7 +85,7 @@ package body Cpu is
    --  Else True
    function Execute_STR(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_STR;
 
    --  Execute an RTI instruction
@@ -88,7 +93,7 @@ package body Cpu is
    --  Else True
    function Execute_RTI(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_RTI;
 
    --  Execute a NOT instruction
@@ -96,7 +101,7 @@ package body Cpu is
    --  Else True
    function Execute_NOT(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_NOT;
 
    --  Execute a LDI instruction
@@ -104,7 +109,7 @@ package body Cpu is
    --  Else True
    function Execute_LDI(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_LDI;
 
    --  Execute an STI instruction
@@ -112,7 +117,7 @@ package body Cpu is
    --  Else True
    function Execute_STI(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_STI;
 
    --  Execute a JMP instruction
@@ -120,7 +125,7 @@ package body Cpu is
    --  Else True
    function Execute_JMP(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_JMP;
 
    --  Execute an LEA instruction
@@ -128,7 +133,7 @@ package body Cpu is
    --  Else True
    function Execute_LEA(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_LEA;
 
    --  Execute a TRAP instruction
@@ -136,7 +141,7 @@ package body Cpu is
    --  Else True
    function Execute_TRAP(Operands : Operands_Bits) return Boolean is
    begin
-      null;
+      return True;
    end Execute_TRAP;
 
    --  Decode and execute an instruction
@@ -155,7 +160,8 @@ package body Cpu is
 
       --  Halt if the operation is illegal
       if Operation = 2#1101# then
-         Print_Error ("Unused operation detected.\nHalting.");
+         Print_Error ("Unused operation detected.");
+         Print_Error ("Exiting.");
          Halt;
       end if;
 
@@ -231,7 +237,7 @@ package body Cpu is
          return;
       end if;
 
-      while (not Has_Halted) and (Registers.PC < 2**16) loop
+      while (not Is_Halted) and (Registers.PC < 2**16) loop
          Execute (Memory (Registers.PC));
       end loop;
 
@@ -242,7 +248,7 @@ package body Cpu is
    -- Halt the CPU
    procedure Halt is
    begin
-      Has_Halted := True;
+      Is_Halted := True;
    end Halt;
 
 begin
