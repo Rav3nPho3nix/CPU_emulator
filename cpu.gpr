@@ -11,4 +11,12 @@ project Cpu is
    package Builder is
       for Executable ("main.c") use "cpu.out";
    end Builder;
+
+   package Compiler is
+      for Default_Switches ("Ada") use (
+         "-gnat2012",
+         "-gnatwa",
+         "-gnatyy"
+      );
+   end Compiler;
 end Cpu;

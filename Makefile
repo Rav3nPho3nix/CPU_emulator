@@ -1,7 +1,7 @@
 target: build
 
 build:
-	gprbuild -gnatyy
+	gprbuild
 
 run:
 	./bin/cpu.out
