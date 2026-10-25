@@ -4,11 +4,7 @@ with Cpu; use Cpu;
 with Print_Utility; use Print_Utility;
 
 package body Cpu is
-   --  Pointer to an instruction execution function
-   type Instruction_Function is access function (Operands : Operands_Bits) return Boolean;
-
-   --  Instruction execution function array
-   type Instruction_Function_Array is array (Operation_Code) of Instruction_Function;
+   --  #### Variables ####
 
    --  Memory (need to be loaded before calling 'Execute')
    Memory : Memory_Array := (others => 0);
@@ -22,10 +18,35 @@ package body Cpu is
    --  Boolean value to check if the cpu has halted
    Is_Halted : Boolean := False;
 
+   --  Array of instructions execution functions
+   --  Each instuction execution function is indexed by an Operation Code
+   Instruction_Functions : Instruction_Functions_Array := (
+      Instructions'Enum_Rep (BR_INSTRUCTION) => Execute_BR'Access,
+      Instructions'Enum_Rep (ADD_INSTRUCTION) => Execute_ADD'Access,
+      Instructions'Enum_Rep (LD_INSTRUCTION) => Execute_LD'Access,
+      Instructions'Enum_Rep (ST_INSTRUCTION) => Execute_ST'Access,
+      Instructions'Enum_Rep (JSR_INSTRUCTION) => Execute_JSR'Access,
+      Instructions'Enum_Rep (AND_INSTRUCTION) => Execute_AND'Access,
+      Instructions'Enum_Rep (LDR_INSTRUCTION) => Execute_LDR'Access,
+      Instructions'Enum_Rep (STR_INSTRUCTION) => Execute_STR'Access,
+      Instructions'Enum_Rep (RTI_INSTRUCTION) => Execute_RTI'Access,
+      Instructions'Enum_Rep (NOT_INSTRUCTION) => Execute_NOT'Access,
+      Instructions'Enum_Rep (LDI_INSTRUCTION) => Execute_LDI'Access,
+      Instructions'Enum_Rep (STI_INSTRUCTION) => Execute_STI'Access,
+      Instructions'Enum_Rep (JMP_INSTRUCTION) => Execute_JMP'Access,
+      Instructions'Enum_Rep (LEA_INSTRUCTION) => Execute_LEA'Access,
+      Instructions'Enum_Rep (TRAP_INSTRUCTION) => Execute_TRAP'Access,
+      others => null
+   );
+
+   --  ####
+
+   --  #### Functions implementations ####
+
    --  Execute a BR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_BR(Operands : Operands_Bits) return Boolean is
+   function Execute_BR (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_BR;
@@ -33,7 +54,7 @@ package body Cpu is
    --  Execute an ADD instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_ADD(Operands : Operands_Bits) return Boolean is
+   function Execute_ADD (Operands : Operands_Bits) return Boolean is
    begin
       --  --  What register the ADD value must me stored
       --  dr : Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 8));
@@ -43,7 +64,7 @@ package body Cpu is
    --  Execute an LD instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_LD(Operands : Operands_Bits) return Boolean is
+   function Execute_LD (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_LD;
@@ -51,7 +72,7 @@ package body Cpu is
    --  Execute an ST instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_ST(Operands : Operands_Bits) return Boolean is
+   function Execute_ST (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_ST;
@@ -59,7 +80,7 @@ package body Cpu is
    --  Execute an JSR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_JSR(Operands : Operands_Bits) return Boolean is
+   function Execute_JSR (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_JSR;
@@ -67,7 +88,7 @@ package body Cpu is
    --  Execute an AND instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_AND(Operands : Operands_Bits) return Boolean is
+   function Execute_AND (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_AND;
@@ -75,7 +96,7 @@ package body Cpu is
    --  Execute an LDR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_LDR(Operands : Operands_Bits) return Boolean is
+   function Execute_LDR (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_LDR;
@@ -83,7 +104,7 @@ package body Cpu is
    --  Execute an STR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_STR(Operands : Operands_Bits) return Boolean is
+   function Execute_STR (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_STR;
@@ -91,7 +112,7 @@ package body Cpu is
    --  Execute an RTI instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_RTI(Operands : Operands_Bits) return Boolean is
+   function Execute_RTI (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_RTI;
@@ -99,7 +120,7 @@ package body Cpu is
    --  Execute a NOT instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_NOT(Operands : Operands_Bits) return Boolean is
+   function Execute_NOT (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_NOT;
@@ -107,7 +128,7 @@ package body Cpu is
    --  Execute a LDI instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_LDI(Operands : Operands_Bits) return Boolean is
+   function Execute_LDI (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_LDI;
@@ -115,7 +136,7 @@ package body Cpu is
    --  Execute an STI instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_STI(Operands : Operands_Bits) return Boolean is
+   function Execute_STI (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_STI;
@@ -123,7 +144,7 @@ package body Cpu is
    --  Execute a JMP instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_JMP(Operands : Operands_Bits) return Boolean is
+   function Execute_JMP (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_JMP;
@@ -131,7 +152,7 @@ package body Cpu is
    --  Execute an LEA instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_LEA(Operands : Operands_Bits) return Boolean is
+   function Execute_LEA (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_LEA;
@@ -139,7 +160,7 @@ package body Cpu is
    --  Execute a TRAP instruction
    --  Return False if the instruction couldn't be executed
    --  Else True
-   function Execute_TRAP(Operands : Operands_Bits) return Boolean is
+   function Execute_TRAP (Operands : Operands_Bits) return Boolean is
    begin
       return True;
    end Execute_TRAP;
@@ -154,8 +175,11 @@ package body Cpu is
       --  Get the operands
       --  Use a mask to only get the 12 first bits
       Operands : Operands_Bits := Operands_Bits (Instruction and 16#0FFF#);
+
+      --  Returned value of the instruction execution call
+      Execution_Status : Boolean;
    begin
-      -- Increment PC by one
+      --  Increment PC by one
       Registers.PC := Registers.PC + 1;
 
       --  Halt if the operation is illegal
@@ -165,59 +189,16 @@ package body Cpu is
          Halt;
       end if;
 
-      case Operation is
-         --  BR
-         when Instructions'Enum_Rep (BR_INSTRUCTION) =>
-            null;
-         --  ADD
-         when Instructions'Enum_Rep (ADD_INSTRUCTION) =>
-            null;
-         --  LD
-         when Instructions'Enum_Rep (LD_INSTRUCTION) =>
-            null;
-         --  ST
-         when Instructions'Enum_Rep (ST_INSTRUCTION) =>
-            null;
-         --  JSR
-         when Instructions'Enum_Rep (JSR_INSTRUCTION) =>
-            null;
-         --  AND
-         when Instructions'Enum_Rep (AND_INSTRUCTION) =>
-            null;
-         --  LDR
-         when Instructions'Enum_Rep (LDR_INSTRUCTION) =>
-            null;
-         --  STR
-         when Instructions'Enum_Rep (STR_INSTRUCTION) =>
-            null;
-         --  RTI
-         when Instructions'Enum_Rep (RTI_INSTRUCTION) =>
-            null;
-         --  NOT
-         when Instructions'Enum_Rep (NOT_INSTRUCTION) =>
-            null;
-         --  LDI
-         when Instructions'Enum_Rep (LDI_INSTRUCTION) =>
-            null;
-         --  STI
-         when Instructions'Enum_Rep (STI_INSTRUCTION) =>
-            null;
-         --  JMP
-         when Instructions'Enum_Rep (JMP_INSTRUCTION) =>
-            null;
-         --  LEA
-         when Instructions'Enum_Rep (LEA_INSTRUCTION) =>
-            null;
-         --  TRAP
-         when Instructions'Enum_Rep (TRAP_INSTRUCTION) =>
-            null;
-         --  Default
-         when others =>
-            null;
-      end case;
+      Execution_Status := Instruction_Functions (Operation).all (Operands);
 
-      Print_Instruction (Instruction);
+      --  Print_Instruction (Instruction);
    end Execute;
+
+   --  Halt the CPU
+   procedure Halt is
+   begin
+      Is_Halted := True;
+   end Halt;
 
    --  Load the memory from C array
    procedure Load_Memory (Memory_Source : Memory_Access) is
@@ -240,16 +221,9 @@ package body Cpu is
       while (not Is_Halted) and (Registers.PC < 2**16) loop
          Execute (Memory (Registers.PC));
       end loop;
-
-      --  Print_Registers (Registers, DECIMAL);
-      --  Print_Registers (Registers, HEXADECIMAL);
    end Start;
 
-   -- Halt the CPU
-   procedure Halt is
-   begin
-      Is_Halted := True;
-   end Halt;
+   --  ####
 
 begin
    null;

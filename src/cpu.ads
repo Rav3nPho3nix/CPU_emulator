@@ -1,6 +1,13 @@
 with Interfaces; use Interfaces;
 
 package Cpu is
+   --  Operation code type
+   type Operation_Code is mod 2 ** 4;
+   for Operation_Code'Size use 4;
+
+   --  Operands
+   type Operands_Bits is mod 2 ** 12;
+   for Operands_Bits'Size use 12;
    
    --  Instructions
    type Instructions is (
@@ -23,30 +30,22 @@ package Cpu is
 
    --  Instructions binary values
    for Instructions use (
-      BR_INSTRUCTION => 2#0000#,
-      ADD_INSTRUCTION => 2#0001#,
-      LD_INSTRUCTION => 2#0010#,
-      ST_INSTRUCTION => 2#0011#,
-      JSR_INSTRUCTION => 2#0100#,
-      AND_INSTRUCTION => 2#0101#,
-      LDR_INSTRUCTION => 2#0110#,
-      STR_INSTRUCTION => 2#0111#,
-      RTI_INSTRUCTION => 2#1000#,
-      NOT_INSTRUCTION => 2#1001#,
-      LDI_INSTRUCTION => 2#1010#,
-      STI_INSTRUCTION => 2#1011#,
-      JMP_INSTRUCTION => 2#1100#,
-      LEA_INSTRUCTION => 2#1110#,
-      TRAP_INSTRUCTION => 2#1111#
+      BR_INSTRUCTION => Operation_Code (2#0000#),
+      ADD_INSTRUCTION => Operation_Code (2#0001#),
+      LD_INSTRUCTION => Operation_Code (2#0010#),
+      ST_INSTRUCTION => Operation_Code (2#0011#),
+      JSR_INSTRUCTION => Operation_Code (2#0100#),
+      AND_INSTRUCTION => Operation_Code (2#0101#),
+      LDR_INSTRUCTION => Operation_Code (2#0110#),
+      STR_INSTRUCTION => Operation_Code (2#0111#),
+      RTI_INSTRUCTION => Operation_Code (2#1000#),
+      NOT_INSTRUCTION => Operation_Code (2#1001#),
+      LDI_INSTRUCTION => Operation_Code (2#1010#),
+      STI_INSTRUCTION => Operation_Code (2#1011#),
+      JMP_INSTRUCTION => Operation_Code (2#1100#),
+      LEA_INSTRUCTION => Operation_Code (2#1110#),
+      TRAP_INSTRUCTION => Operation_Code (2#1111#)
    );
-
-   --  Operation code type
-   type Operation_Code is mod 2 ** 4;
-   for Operation_Code'Size use 4;
-
-   --  Operands
-   type Operands_Bits is mod 2 ** 12;
-   for Operands_Bits'Size use 12;
 
    --  Memory index
    type Memory_Index is range 0 .. 2**16 - 1;
@@ -69,8 +68,6 @@ package Cpu is
    --  Register array
    type Register_Array is array (Register_Index) of Register;
 
-   --  Registers array
-
    --  Registers of the CPU
    type Registers_Record is record
       --  R0, R1, R2, R3, R4, R5, R6, R7 : Unsigned_16 := 0;
@@ -78,6 +75,14 @@ package Cpu is
       PSR, USP, SSP, IR : Unsigned_16 := 0;
       PC : Memory_Index := 0;
    end record;
+
+   --  Pointer to an instruction execution function
+   type Instruction_Function is access function (Operands : Operands_Bits)
+      return Boolean;
+
+   --  Instruction execution functions array
+   type Instruction_Functions_Array is array (Operation_Code)
+      of Instruction_Function;
 
    --  Load memory from C array
    procedure Load_Memory (Memory_Source : Memory_Access)
@@ -87,7 +92,86 @@ package Cpu is
    procedure Start
       with Export => True, Convention => C, External_Name => "start";
 
-   -- Halt the CPU
+   --  Execute a BR instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_BR (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an ADD instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_ADD (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an LD instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_LD (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an ST instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_ST (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an JSR instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_JSR (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an AND instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_AND (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an LDR instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_LDR (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an STR instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_STR (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an RTI instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_RTI (Operands : Operands_Bits) return Boolean;
+
+   --  Execute a NOT instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_NOT (Operands : Operands_Bits) return Boolean;
+
+   --  Execute a LDI instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_LDI (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an STI instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_STI (Operands : Operands_Bits) return Boolean;
+
+   --  Execute a JMP instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_JMP (Operands : Operands_Bits) return Boolean;
+
+   --  Execute an LEA instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_LEA (Operands : Operands_Bits) return Boolean;
+
+   --  Execute a TRAP instruction
+   --  Return False if the instruction couldn't be executed
+   --  Else True
+   function Execute_TRAP (Operands : Operands_Bits) return Boolean;
+
+   --  Decode and execute an instruction
+   --  Always increment PC by one
+   procedure Execute (Instruction : Unsigned_16);
+
+   --  Halt the CPU
    procedure Halt;
 
 end Cpu;
