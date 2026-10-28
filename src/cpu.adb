@@ -1,4 +1,5 @@
 with Interfaces; use Interfaces;
+with Ada.Text_IO; use Ada.Text_IO;
 
 with Cpu; use Cpu;
 with Print_Utility; use Print_Utility;
@@ -55,9 +56,52 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_ADD (Operands : Operands_Bits) return Boolean is
+      --  Destination register
+      DR : constant Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 9));
+
+      --  First register
+      SR1 : constant Register_Index := Register_Index
+         (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
+      
+      --  Mode bit
+      Mode : constant Mode_Bit := Mode_Bit (Shift_Right (Unsigned_16 (Operands), 5) and 2#1#);
+
+      --  Second register (if mode = 0)
+      SR2 : Register_Index;
+
+      --  Immediate value (id mode = 1) of 5 bits
+      Imm5 : Unsigned_16;
+
+      --  Extended immediate value to 16 bits
+      Ext_Imm5 : Unsigned_16;
    begin
-      --  --  What register the ADD value must me stored
-      --  dr : Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 8));
+      --  ADD the content of SR1 with SR2 (first 3 bits)
+      if Mode = 0 then
+         SR2 := Register_Index (Unsigned_16 (Operands) and 2#111#);
+         Registers.Registers (DR) := Registers.Registers (SR1) +
+            Registers.Registers (SR2);
+      
+      --  ADD the content of SR1 with the immediate value (first 5 bits, extended to 16)
+      else
+         Imm5 := Unsigned_16 (Operands) and 2#11111#;
+
+         --  If the last bit is 1, the number is signed at negative
+         --  I fill the bits [5; 15] by 1
+         if (Imm5 and 2#10000#) /= 0 then
+            Ext_Imm5 := Imm5 or 16#FFE0#;
+         
+         --  else it's a positive
+         --  I do nothing
+         else
+            Ext_Imm5 := Imm5;
+         end if;
+
+         Registers.Registers (DR) := Registers.Registers (SR1) + Register (Ext_Imm5);
+      end if;
+
+      --  Update PSR
+      Update_PSR (Unsigned_16 (Registers.Registers (DR)));
+
       return True;
    end Execute_ADD;
 
@@ -190,8 +234,6 @@ package body Cpu is
       end if;
 
       Execution_Status := Instruction_Functions (Operation).all (Operands);
-
-      --  Print_Instruction (Instruction);
    end Execute;
 
    --  Halt the CPU
@@ -199,6 +241,23 @@ package body Cpu is
    begin
       Is_Halted := True;
    end Halt;
+
+   --  Update PSR register
+   procedure Update_PSR (Value : Unsigned_16) is
+   begin
+      --  If it is equal to zero
+      if Value = 16#0000# then
+         Registers.PSR := 2#010#;
+
+      --  If it is positive
+      elsif Shift_Right (Value, 15) = 0 then
+         Registers.PSR := 2#001#;
+      
+      --  If it is negative
+      elsif Shift_Right (Value, 15) = 1 then
+         Registers.PSR := 2#100#;
+      end if; 
+   end Update_PSR;
 
    --  Load the memory from C array
    procedure Load_Memory (Memory_Source : Memory_Access) is

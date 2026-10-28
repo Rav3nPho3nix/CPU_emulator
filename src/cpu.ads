@@ -8,6 +8,10 @@ package Cpu is
    --  Operands
    type Operands_Bits is mod 2 ** 12;
    for Operands_Bits'Size use 12;
+
+   --  Mode bit
+   type Mode_Bit is mod 2;
+   for Mode_Bit'Size use 1;
    
    --  Instructions
    type Instructions is (
@@ -48,7 +52,7 @@ package Cpu is
    );
 
    --  Memory index
-   type Memory_Index is range 0 .. 2**16 - 1;
+   type Memory_Index is range 0 .. 2 ** 16 - 1;
 
    --  Memory array
    type Memory_Array is array (Memory_Index) of Unsigned_16
@@ -59,11 +63,11 @@ package Cpu is
       with Convention => C;
 
    --  Register type
-   type Register is mod 2 ** 4;
+   type Register is new Unsigned_16;
 
    --  Register index
-   --  There is 8 registers
-   type Register_Index is range 0 .. 7;
+   --  2 ** 3 registers => range between 0 and 2 ** 3 - 1
+   type Register_Index is range 0 .. 2 ** 3 - 1;
 
    --  Register array
    type Register_Array is array (Register_Index) of Register;
@@ -170,6 +174,9 @@ package Cpu is
    --  Decode and execute an instruction
    --  Always increment PC by one
    procedure Execute (Instruction : Unsigned_16);
+
+   --  Update PSR register
+   procedure Update_PSR (Value : Unsigned_16);
 
    --  Halt the CPU
    procedure Halt;
