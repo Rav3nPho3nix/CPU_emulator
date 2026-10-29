@@ -133,7 +133,52 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_AND (Operands : Operands_Bits) return Boolean is
+      --  Destination register
+      DR : constant Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 9));
+
+      --  First register
+      SR1 : constant Register_Index := Register_Index
+         (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
+      
+      --  Mode bit
+      Mode : constant Mode_Bit := Mode_Bit (Shift_Right (Unsigned_16 (Operands), 5) and 2#1#);
+
+      --  Second register (if mode = 0)
+      SR2 : Register_Index;
+
+      --  Immediate value (id mode = 1) of 5 bits
+      Imm5 : Unsigned_16;
+
+      --  Extended immediate value to 16 bits
+      Ext_Imm5 : Unsigned_16;
    begin
+      --  AND the content of SR1 with SR2 (first 3 bits)
+      if Mode = 0 then
+         SR2 := Register_Index (Unsigned_16 (Operands) and 2#111#);
+         Registers.Registers (DR) := Registers.Registers (SR1) +
+            Registers.Registers (SR2);
+      
+      --  AND the content of SR1 with the immediate value (first 5 bits, extended to 16)
+      else
+         Imm5 := Unsigned_16 (Operands) and 2#11111#;
+
+         --  If the last bit is 1, the number is signed at negative
+         --  I fill the bits [5; 15] by 1
+         if (Imm5 and 2#10000#) /= 0 then
+            Ext_Imm5 := Imm5 or 16#FFE0#;
+         
+         --  else it's a positive
+         --  I do nothing
+         else
+            Ext_Imm5 := Imm5;
+         end if;
+
+         Registers.Registers (DR) := Registers.Registers (SR1) and Register (Ext_Imm5);
+      end if;
+
+      --  Update PSR
+      Update_PSR (Unsigned_16 (Registers.Registers (DR)));
+
       return True;
    end Execute_AND;
 
@@ -206,6 +251,7 @@ package body Cpu is
    --  Else True
    function Execute_TRAP (Operands : Operands_Bits) return Boolean is
    begin
+      Halt;
       return True;
    end Execute_TRAP;
 
@@ -279,6 +325,7 @@ package body Cpu is
 
       while (not Is_Halted) and (Registers.PC < 2**16) loop
          Execute (Memory (Registers.PC));
+         Print_Registers (Registers, BINARY);
       end loop;
    end Start;
 
