@@ -48,7 +48,20 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_BR (Operands : Operands_Bits) return Boolean is
+      --  PC Offset of 9 bits
+      PCoffset9 : constant Unsigned_16 := Unsigned_16 (Operands) and 16#01FF#;
+
+      --  Extended PC Offset value to 16 bits
+      --  If the last bit is 1, I fill the bits [10; 16] with 1
+      --  Else I do nothing
+      Ext_PCoffset9 : constant Unsigned_16 := (if ((PCoffset9 and 16#100#) /= 0) then (PCoffset9 or 16#FE00#) else PCoffset9);
    begin
+
+      if (Shift_Right (Unsigned_16 (Operands), 9) and 2#111# and Registers.PSR and 2#111#) /= 0
+      then
+         Registers.PC := Registers.PC + Memory_Index (Ext_PCoffset9);
+      end if;
+
       return True;
    end Execute_BR;
 
@@ -85,7 +98,7 @@ package body Cpu is
       else
          Imm5 := Unsigned_16 (Operands) and 2#11111#;
 
-         --  If the last bit is 1, the number is signed at negative
+         --  If the last bit is 1, the number is negatively signed
          --  I fill the bits [5; 15] by 1
          if (Imm5 and 2#10000#) /= 0 then
             Ext_Imm5 := Imm5 or 16#FFE0#;
