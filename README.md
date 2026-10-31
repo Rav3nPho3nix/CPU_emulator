@@ -4,16 +4,19 @@
 
 LC-3 CPU Emulator made in ADA.
 
-## ToDo
-- [ ] Implement all instructions
-- [ ] Implement file reading
-- [ ] Add registers debug mode mode (hex, binary, decimal)
+## Compilation
 
-## Usage
+Compilation :
+```make```
 
-Here are the availables arguments :
-* `-dr` (registers debug mode) : print registers every step of the execution
-* `-di` (instructions debug mode) : print instructions before every step of the execution
-* `-t=[BR|ADD|LD|...|LEA|TRAP]` (test program) : execute a test program for the specified instruction.
-(if the argument `-e=...` is passed multiples times, the last one is taken)
-* `-e=...` (example program) : execute an exemple program with the specified name.
+## Execution
+
+Usage : `./bin/cpu.out [OPTIONS] path/to/program.asm`
+
+Here are the availables options :
+
+|Options name|Command-line argument|Description|
+|---|---|---|
+|Registers debug mode|`-dr`|print registers values at every step of the execution|
+|Instructions debug mode|`-di`|print instruction currently executed at every step of the execution|
+|Debug mode|`-d`|Enable the two debug modes|
