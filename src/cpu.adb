@@ -59,7 +59,7 @@ package body Cpu is
 
       if (Shift_Right (Unsigned_16 (Operands), 9) and 2#111# and Registers.PSR and 2#111#) /= 0
       then
-         Registers.PC := Registers.PC + Memory_Index (Ext_PCoffset9);
+         Registers.PC := Memory_Index (Unsigned_16 (Registers.PC) + Ext_PCoffset9);
       end if;
 
       return True;
@@ -290,6 +290,10 @@ package body Cpu is
       --  Increment PC by one
       Registers.PC := Registers.PC + 1;
 
+      Put_Line ("");
+      Put_Line ("----");
+      Print_Instruction (Instruction);
+
       --  Halt if the operation is illegal
       if Operation = 2#1101# then
          Print_Error ("Unused operation detected.");
@@ -340,6 +344,8 @@ package body Cpu is
          Print_Error ("The memory need to be loaded before starting the CPU.");
          return;
       end if;
+
+      Print_Registers (Registers, BINARY);
 
       while (not Is_Halted) and (Registers.PC < 2**16) loop
          Execute (Memory (Registers.PC));
