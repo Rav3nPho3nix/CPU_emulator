@@ -54,13 +54,19 @@ package Cpu is
    --  Memory index
    type Memory_Index is range 0 .. 2 ** 16 - 1;
 
+   --  --  Memory array
+   --  type Memory_Array is array (Memory_Index) of Unsigned_16
+   --     with Convention => C;
+
+   --  --  Memory pointer from C code
+   --  type Memory_Access is access all Memory_Array
+   --     with Convention => C;
+
    --  Memory array
-   type Memory_Array is array (Memory_Index) of Unsigned_16
-      with Convention => C;
+   type Memory_Array is array (Memory_Index) of Unsigned_16;
 
    --  Memory pointer from C code
-   type Memory_Access is access all Memory_Array
-      with Convention => C;
+   type Memory_Access is access all Memory_Array;
 
    --  Register type
    type Register is new Unsigned_16;
@@ -88,13 +94,19 @@ package Cpu is
    type Instruction_Functions_Array is array (Operation_Code)
       of Instruction_Function;
 
-   --  Load memory from C array
-   procedure Load_Memory (Memory_Source : Memory_Access)
-      with Export => True, Convention => C, External_Name => "load_memory";
+   --  --  Load memory from C array
+   --  procedure Load_Memory (Memory_Source : Memory_Access)
+   --     with Export => True, Convention => C, External_Name => "load_memory";
 
-   --  Execute instructions stored in memory
-   procedure Start
-      with Export => True, Convention => C, External_Name => "start";
+   --  --  Execute instructions stored in memory
+   --  procedure Start
+   --     with Export => True, Convention => C, External_Name => "start";
+
+   --  Load memory
+   procedure Load_Memory (Memory : Memory_Array);
+
+   --  Execute instructions
+   procedure Start;
 
    --  Execute a BR instruction
    --  Return False if the instruction couldn't be executed

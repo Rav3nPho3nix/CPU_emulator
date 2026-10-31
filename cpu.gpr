@@ -6,10 +6,12 @@ project Cpu is
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "bin";
 
-   for Main use ("main.c");
+   -- for Main use ("main.c");
+   for Main use ("main.adb");
 
    package Builder is
-      for Executable ("main.c") use "cpu.out";
+      -- for Executable ("main.c") use "cpu.out";
+      for Executable ("main.adb") use "cpu.out";
    end Builder;
 
    package Compiler is

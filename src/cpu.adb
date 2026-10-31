@@ -327,10 +327,36 @@ package body Cpu is
       end if; 
    end Update_PSR;
 
-   --  Load the memory from C array
-   procedure Load_Memory (Memory_Source : Memory_Access) is
+   --  --  Load the memory from C array
+   --  procedure Load_Memory (Memory_Source : Memory_Access) is
+   --  begin
+   --     Memory := Memory_Source.all;
+   --     --  Set the flag as true
+   --     Memory_Is_Loaded := True;
+   --  end Load_Memory;
+
+   --  --  Execute instructions stored in memory
+   --  procedure Start is
+   --  begin
+   --     --  Check if the memory is loaded
+   --     --  If not, put an error and exit the function
+   --     if not Memory_Is_Loaded then
+   --        Print_Error ("The memory need to be loaded before starting the CPU.");
+   --        return;
+   --     end if;
+
+   --     Print_Registers (Registers, BINARY);
+
+   --     while (not Is_Halted) and (Registers.PC < 2**16) loop
+   --        Execute (Memory (Registers.PC));
+   --        Print_Registers (Registers, BINARY);
+   --     end loop;
+   --  end Start;
+
+   --  Load the memory
+   procedure Load_Memory (Memory : Memory_Array) is
    begin
-      Memory := Memory_Source.all;
+      Cpu.Memory := Memory;
       --  Set the flag as true
       Memory_Is_Loaded := True;
    end Load_Memory;
