@@ -168,23 +168,28 @@ package body Cpu is
       --  AND the content of SR1 with SR2 (first 3 bits)
       if Mode = 0 then
          SR2 := Register_Index (Unsigned_16 (Operands) and 2#111#);
-         Registers.Registers (DR) := Registers.Registers (SR1) +
+         Registers.Registers (DR) := Registers.Registers (SR1) and
             Registers.Registers (SR2);
       
       --  AND the content of SR1 with the immediate value (first 5 bits, extended to 16)
       else
          Imm5 := Unsigned_16 (Operands) and 2#11111#;
 
-         --  If the last bit is 1, the number is signed at negative
-         --  I fill the bits [5; 15] by 1
-         if (Imm5 and 2#10000#) /= 0 then
-            Ext_Imm5 := Imm5 or 16#FFE0#;
+         --  --  If the last bit is 1, the number is signed at negative
+         --  --  I fill the bits [5; 15] by 1
+         --  if (Imm5 and 2#10000#) /= 0 then
+         --     Ext_Imm5 := Imm5 or 16#FFE0#;
          
-         --  else it's a positive
-         --  I do nothing
-         else
-            Ext_Imm5 := Imm5;
-         end if;
+         --  --  else it's a positive
+         --  --  I do nothing
+         --  else
+         --     Ext_Imm5 := Imm5;
+         --  end if;
+
+         --  Extended Immediate value to 16 bits
+         --  If the last bit is 1, I fill the bits [5; 15] with 1
+         --  Else I do nothing
+         Ext_Imm5 := (if ((Imm5 and 2#10000#) /= 0) then (Imm5 or 16#FFE0#) else Imm5);
 
          Registers.Registers (DR) := Registers.Registers (SR1) and Register (Ext_Imm5);
       end if;
