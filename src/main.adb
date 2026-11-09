@@ -1,25 +1,20 @@
 with Ada.Command_Line; use Ada.Command_Line;
-with Ada.Numerics.Generic_Complex_Types;
+--  with Ada.Numerics.Generic_Complex_Types;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Directories; use Ada.Directories;
-
+with Ada.Sequential_IO;
+with Interfaces; use Interfaces;
 with GNAT.String_Split; use GNAT.String_Split;
 
 with Cpu; use Cpu;
 
 procedure Main is
-   --  Emulator memory
-   Memory : Cpu.Memory_Array;
-
-   --  Flags
-   Program_Provided : Boolean := False;
-   Debug_Instructions_Enabled : Boolean := False;
-   Debug_Registers_Enabled : Boolean := False;
-
-   --  Input program fle name
-   Program_File_Name : Unbounded_String;
+   --  Package to handle Unsigned_8 in Sequential_IO
+   --  Because the LC-3 is a big endian machine, i nneed to read 2 Unsigned_8
+   package Unsigned_8_IO is new Ada.Sequential_IO (Unsigned_8);
+   use Unsigned_8_IO;
 
    --  Get the string just after the last specified separator
    function Get_String_After_Separator (Str: String; Separator: Character) return String is
@@ -37,6 +32,26 @@ procedure Main is
       return Str (i+1 .. Str'Last);
    end Get_String_After_Separator;
 
+   --  Emulator memory
+   Memory : Cpu.Memory_Array;
+
+   --  Flags
+   Program_Provided : Boolean := False;
+   Debug_Instructions_Enabled : Boolean := False;
+   Debug_Registers_Enabled : Boolean := False;
+
+   --  Input program file name
+   Program_File_Name : Unbounded_String;
+
+   --  Program file
+   Program_File : Unsigned_8_IO.File_Type;
+
+   --  Temporary values to read the program file
+   Instruction_P1 : Unsigned_8;
+   Instruction_P2 : Unsigned_8;
+
+   --  Index to store inside memory
+   Index : Memory_Index := 0;
 begin
    --  Loop through arguments
    for i in 1 .. Argument_Count loop
@@ -100,28 +115,32 @@ begin
       Put_Line ("[x] Debug registers enabled");
    end if;
 
+   --  Open the program file
+   Open (Program_File, In_File, To_String (Program_File_Name));
 
-   --  Example program to test ADD instructions
+   --  Fill the memory
+   while not End_Of_File (Program_File) loop
+      --  Read the first byte of an instruction
+      Read (Program_File, Instruction_P1);
 
-   --  ADD with R0 the immediate value 1 => store in R1
-   --  0001 001 000 1 0 0001
-   Memory (0) := 2#0001001000100001#;
+      --  If it's the end of the file, the program file is odd
+      if End_Of_File (Program_File) then
+         Put_Line ("The provided program has an odd size. Exiting.");
+         return;
+      end if;
 
-   --  ADD with R1 the immediate value 4 => store in R1
-   --  0001 001 001 1 0 0100
-   Memory (1) := 2#0001001001100100#;
+      --  Read the second byte of an instruction
+      Read (Program_File, Instruction_P2);
 
-   --  ADD with R1 the immediate value -1 => store in R0
-   --  0001 000 001 1 0 1111
-   Memory (2) := 2#0001000001111111#;
+      --  Fill the memory
+      Memory (Index) := Shift_Left (Unsigned_16 (Instruction_P1), 8) or Unsigned_16 (Instruction_P2);
 
-   --  ADD with R0 the immediate value -4 => store in R0
-   --  0001 000 000 1 1 1101
-   Memory (3) := 2#0001000000111100#;
+      Index := Index + 1;
+   end loop;
 
-   --  Halt
-   Memory (4) := 2#1111000000000000#;
+   --  Close the file
+   Close (Program_File);
 
    Load_Memory (Memory);
-   --  Start;
+   Start;
 end Main;
