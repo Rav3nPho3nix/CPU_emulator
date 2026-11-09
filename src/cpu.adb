@@ -247,7 +247,21 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_JMP (Operands : Operands_Bits) return Boolean is
+      --  Register source
+      BaseR : constant Register_Index := Register_Index
+         (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
    begin
+      --  If the BaseR is exactly 111
+      --  I set PC value to R7
+      if BaseR = 2#111# then
+         Registers.PC := Memory_Index (Registers.Registers (Register_Index (7)));
+
+      --  Else I set it to the register value
+      else
+         Registers.PC := Memory_Index (Registers.Registers (BaseR));
+
+      end if;
+
       return True;
    end Execute_JMP;
 
