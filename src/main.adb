@@ -1,12 +1,10 @@
 with Ada.Command_Line; use Ada.Command_Line;
---  with Ada.Numerics.Generic_Complex_Types;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO; use Ada.Text_IO.Unbounded_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Directories; use Ada.Directories;
 with Ada.Sequential_IO;
 with Interfaces; use Interfaces;
-with GNAT.String_Split; use GNAT.String_Split;
 
 with Cpu; use Cpu;
 
@@ -60,15 +58,19 @@ begin
          --  If the argument is '-di'
          if Argument (i) = "-di" then
             Debug_Instructions_Enabled := true;
+            Enable_Instructions_Debug;
 
          --  If the argument is '-dr'
          elsif Argument (i) = "-dr" then
             Debug_Registers_Enabled := true;
+            Enable_Registers_Debug;
 
          --  Else it is both
          else
             Debug_Instructions_Enabled := true;
             Debug_Registers_Enabled := true;
+            Enable_Instructions_Debug;
+            Enable_Registers_Debug;
 
          end if;
       

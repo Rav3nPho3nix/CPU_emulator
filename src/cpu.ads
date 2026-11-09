@@ -108,6 +108,12 @@ package Cpu is
    --  Execute instructions
    procedure Start;
 
+   --  Enable Registers debug
+   procedure Enable_Registers_Debug;
+
+   --  Enable Instructions debug
+   procedure Enable_Instructions_Debug;
+
    --  Execute a BR instruction
    --  Return False if the instruction couldn't be executed
    --  Else True

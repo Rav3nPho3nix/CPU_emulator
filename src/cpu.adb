@@ -19,6 +19,12 @@ package body Cpu is
    --  Boolean value to check if the cpu has halted
    Is_Halted : Boolean := False;
 
+   --  Boolean value to check if the instructions debug mode is enabled
+   Instructions_Debug_Enabled : Boolean := False;
+
+   --  Boolean value to check if the registers debug mode is enabled
+   Registers_Debug_Enabled : Boolean := False;
+
    --  Array of instructions execution functions
    --  Each instuction execution function is indexed by an Operation Code
    Instruction_Functions : Instruction_Functions_Array := (
@@ -175,17 +181,6 @@ package body Cpu is
       else
          Imm5 := Unsigned_16 (Operands) and 2#11111#;
 
-         --  --  If the last bit is 1, the number is signed at negative
-         --  --  I fill the bits [5; 15] by 1
-         --  if (Imm5 and 2#10000#) /= 0 then
-         --     Ext_Imm5 := Imm5 or 16#FFE0#;
-         
-         --  --  else it's a positive
-         --  --  I do nothing
-         --  else
-         --     Ext_Imm5 := Imm5;
-         --  end if;
-
          --  Extended Immediate value to 16 bits
          --  If the last bit is 1, I fill the bits [5; 15] with 1
          --  Else I do nothing
@@ -290,15 +285,17 @@ package body Cpu is
       --  Increment PC by one
       Registers.PC := Registers.PC + 1;
 
-      Put_Line ("");
-      Put_Line ("----");
-      Print_Instruction (Instruction);
-
       --  Halt if the operation is illegal
       if Operation = 2#1101# then
          Print_Error ("Unused operation detected.");
          Print_Error ("Exiting.");
          Halt;
+      end if;
+
+      --  If the debug mode is activated
+      if Instructions_Debug_Enabled then
+         Put_Line ("");
+         Print_Instruction (Instruction);
       end if;
 
       Execution_Status := Instruction_Functions (Operation).all (Operands);
@@ -371,13 +368,32 @@ package body Cpu is
          return;
       end if;
 
-      Print_Registers (Registers, BINARY);
+      --  Print if the debug mode is activated
+      if Registers_Debug_Enabled then
+         Print_Registers (Registers, BINARY);
+      end if;
 
       while (not Is_Halted) and (Registers.PC < 2**16) loop
          Execute (Memory (Registers.PC));
-         Print_Registers (Registers, BINARY);
+
+         --  Print if the debug mode is activated
+         if Registers_Debug_Enabled then
+            Print_Registers (Registers, BINARY);
+         end if;
       end loop;
    end Start;
+
+   --  Enable Registers debug
+   procedure Enable_Registers_Debug is
+   begin
+      Registers_Debug_Enabled := true;
+   end;
+
+   --  Enable Instructions debug
+   procedure Enable_Instructions_Debug is
+   begin
+      Instructions_Debug_Enabled := true;
+   end;
 
    --  ####
 
