@@ -144,7 +144,59 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_JSR (Operands : Operands_Bits) return Boolean is
+      --  Mode bit
+      Mode : constant Mode_Bit := Mode_Bit (Shift_Right (Unsigned_16 (Operands), 11) and 2#1#);
+
+      --  --  PC Offset of 9 bits
+      --  PCoffset9 : constant Unsigned_16 := Unsigned_16 (Operands) and 16#01FF#;
+
+      --  --  Extended PC Offset value to 16 bits
+      --  --  If the last bit is 1, I fill the bits [10; 16] with 1
+      --  --  Else I do nothing
+      --  Ext_PCoffset9 : constant Unsigned_16 := (if ((PCoffset9 and 16#100#) /= 0) then (PCoffset9 or 16#FE00#) else PCoffset9);
+   
+      --  PC Offset of 11 bits
+      --  If mode = 1
+      PCoffset11 : Unsigned_16;
+
+      --  Extanted PC Offset value to 16 bits
+      Ext_PCoffset11 : Unsigned_16;
+
+      --  Register source
+      --  BaseR : constant Register_Index := Register_Index
+         --  (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
+      
+      --  Register source
+      BaseR : Register_Index;
+
+      --  Target
+
    begin
+      --  Store in R7 the current value of PC
+      Registers.Registers (Register_Index (7)) := Register (Registers.PC);
+
+      --  If mode = 1
+      --  Add to PC the PCOffset11
+      if Mode = 1 then
+         --   Get the PCOffset11
+         PCoffset11 := Unsigned_16 (Operands) and 16#7FF#;
+
+         --  Extend it to 16 bits
+         Ext_PCoffset11 := (if ((PCoffset11 and 16#400#) /= 0) then (PCoffset11 or 16#F800#) else PCoffset11);
+
+         --  Addition into PC
+         Registers.PC := Memory_Index (Unsigned_16 (Registers.PC) + Ext_PCoffset11);
+
+      --  Else
+      --  Set PC value to BaseR register value
+      else
+         --  Get the register id
+         BaseR := Register_Index (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
+
+         --  Set PC value
+         Registers.PC := Memory_Index (Registers.Registers (BaseR));
+      end if;
+
       return True;
    end Execute_JSR;
 
@@ -251,17 +303,8 @@ package body Cpu is
       BaseR : constant Register_Index := Register_Index
          (Shift_Right (Unsigned_16 (Operands), 6) and 2#111#);
    begin
-      --  If the BaseR is exactly 111
-      --  I set PC value to R7
-      if BaseR = 2#111# then
-         Registers.PC := Memory_Index (Registers.Registers (Register_Index (7)));
-
-      --  Else I set it to the register value
-      else
-         Registers.PC := Memory_Index (Registers.Registers (BaseR));
-
-      end if;
-
+      --  I set PC value to BaseR value
+      Registers.PC := Memory_Index (Registers.Registers (BaseR));
       return True;
    end Execute_JMP;
 
