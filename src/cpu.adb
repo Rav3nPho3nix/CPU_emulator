@@ -128,7 +128,23 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_LD (Operands : Operands_Bits) return Boolean is
+      --  Destination register
+      DR : constant Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 9));
+
+      --  PC Offset of 9 bits
+      PCoffset9 : constant Unsigned_16 := Unsigned_16 (Operands) and 16#01FF#;
+
+      --  Extended PC Offset value to 16 bits
+      --  If the last bit is 1, I fill the bits [10; 16] with 1
+      --  Else I do nothing
+      Ext_PCoffset9 : constant Unsigned_16 := (if ((PCoffset9 and 16#100#) /= 0) then (PCoffset9 or 16#FE00#) else PCoffset9);
    begin
+      --  Set the value of the DR register to PC + Ext_PCOffset9
+      Registers.Registers (DR) := Register (Registers.PC) + Register (Ext_PCoffset9);
+      
+      --  Update PSR
+      Update_PSR (Unsigned_16 (Registers.Registers (DR)));
+      
       return True;
    end Execute_LD;
 
@@ -283,7 +299,29 @@ package body Cpu is
    --  Return False if the instruction couldn't be executed
    --  Else True
    function Execute_LDI (Operands : Operands_Bits) return Boolean is
+      --  Destination register
+      DR : constant Register_Index := Register_Index (Shift_Right (Unsigned_16 (Operands), 9));
+
+      --  PC Offset of 9 bits
+      PCoffset9 : constant Unsigned_16 := Unsigned_16 (Operands) and 16#01FF#;
+
+      --  Extended PC Offset value to 16 bits
+      --  If the last bit is 1, I fill the bits [10; 16] with 1
+      --  Else I do nothing
+      Ext_PCoffset9 : constant Unsigned_16 := (if ((PCoffset9 and 16#100#) /= 0) then (PCoffset9 or 16#FE00#) else PCoffset9);
+   
+      --  Temporary value of the intermediate memory adress
+      Intermediate_Address : Memory_Index;
    begin
+      --  Sum of PC with Ext_PCOffset8
+      Intermediate_Address := Memory_Index (Unsigned_16 (Registers.PC) + Ext_PCoffset9);
+      
+      --  Store in DR the value at the intermediate memory address
+      Registers.Registers (DR) := Register (Memory (Memory_Index (Memory (Intermediate_Address))));
+
+      --  Update PSR
+      Update_PSR (Unsigned_16 (Registers.Registers (DR)));
+      
       return True;
    end Execute_LDI;
 
@@ -444,13 +482,13 @@ package body Cpu is
    procedure Enable_Registers_Debug is
    begin
       Registers_Debug_Enabled := true;
-   end;
+   end Enable_Registers_Debug;
 
    --  Enable Instructions debug
    procedure Enable_Instructions_Debug is
    begin
       Instructions_Debug_Enabled := true;
-   end;
+   end Enable_Instructions_Debug;
 
    --  ####
 
